@@ -1,28 +1,83 @@
 -- ══════════════════════════════════════════
 -- MiniStore — Soluciones con Outer JOINs
--- Autor: [Manuel Silva]
--- Fecha: [28/09/2026]
+-- Autor: Manuel
+-- Fecha: 2026-09-28
 -- ══════════════════════════════════════════
 
--- ── CONSULTA 1: LEFT JOIN ─────────────────
--- Pregunta de negocio: ¿Qué productos del catálogo nunca fueron vendidos?
+-- ──────────────────────────────────────────
+-- CONSULTA 1: LEFT JOIN
+-- Pregunta: ¿Qué productos del catálogo nunca fueron vendidos?
 -- Mostrá todos los productos y sus ventas asociadas.
 -- Los productos sin ventas aparecerán con NULL en las columnas de ventas.
+-- ──────────────────────────────────────────
 
--- [Tu consulta aquí]
+SELECT
+    p.producto_id,
+    p.nombre,
+    p.categoria,
+    p.precio,
+    v.venta_id,
+    v.cantidad,
+    v.fecha_venta
+FROM productos p
+LEFT JOIN ventas v ON p.producto_id = v.producto_id
+ORDER BY p.producto_id;
+
+-- Filtro para ver SOLO los productos sin ventas:
+-- SELECT * FROM productos p
+-- LEFT JOIN ventas v ON p.producto_id = v.producto_id
+-- WHERE v.venta_id IS NULL;
 
 
--- ── CONSULTA 2: RIGHT JOIN ────────────────
--- Pregunta de negocio: ¿Existen ventas registradas con productos
--- que no figuran en nuestro catálogo? (posible error de carga de datos)
+-- ──────────────────────────────────────────
+-- CONSULTA 2: RIGHT JOIN
+-- Pregunta: ¿Existen ventas registradas con productos inexistentes?
 -- Los registros huérfanos aparecerán con NULL en las columnas de productos.
+-- ──────────────────────────────────────────
 
--- [Tu consulta aquí]
+SELECT
+    v.venta_id,
+    v.producto_id,
+    v.cliente_id,
+    v.cantidad,
+    v.fecha_venta,
+    p.nombre,
+    p.categoria,
+    p.precio
+FROM productos p
+RIGHT JOIN ventas v ON p.producto_id = v.producto_id
+ORDER BY v.venta_id;
+
+-- Filtro para ver SOLO las ventas huérfanas:
+-- SELECT * FROM productos p
+-- RIGHT JOIN ventas v ON p.producto_id = v.producto_id
+-- WHERE p.producto_id IS NULL;
 
 
--- ── CONSULTA 3: FULL OUTER JOIN ───────────
--- Pregunta de negocio: Vista completa de auditoría que muestre
--- todos los productos y todas las ventas sin perder ninguna fila,
--- identificando tanto productos sin ventas como ventas sin producto.
+-- ──────────────────────────────────────────
+-- CONSULTA 3: FULL OUTER JOIN
+-- Pregunta: Vista completa de auditoría.
+-- Mostrar todos los productos y todas las ventas sin perder ninguna fila.
+-- Identificar productos sin ventas y ventas sin producto.
+-- ──────────────────────────────────────────
 
--- [Tu consulta aquí]
+SELECT
+    p.producto_id,
+    p.nombre,
+    p.categoria,
+    p.precio,
+    v.venta_id,
+    v.producto_id AS producto_id_venta,
+    v.cliente_id,
+    v.cantidad,
+    v.fecha_venta
+FROM productos p
+FULL OUTER JOIN ventas v ON p.producto_id = v.producto_id
+ORDER BY COALESCE(p.producto_id, v.producto_id);
+
+-- Filtros útiles:
+-- Productos sin ventas:
+-- WHERE v.venta_id IS NULL
+--
+-- Ventas sin producto:
+-- WHERE p.producto_id IS NULL
